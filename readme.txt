@@ -4,7 +4,7 @@ Tags: football, laliga, standings, widget, espn
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.5
+Stable tag: 1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,7 +90,21 @@ Sí. El plugin utilitza transients de WordPress, totalment compatibles amb LiteS
 = ¿Es compatible con plugins de caché? =
 Sí. El plugin utiliza transients de WordPress, totalmente compatibles con LiteSpeed Cache, W3 Total Cache, WP Super Cache y similares.
 
+== External services ==
+
+This plugin connects to ESPN to display La Liga standings.
+
+* ESPN soccer standings API (`site.web.api.espn.com` / `site.api.espn.com`) is requested from the server when the widget loads and the 1-hour cache is empty.
+* No visitor personal data is sent; the request is a standard HTTP GET for public league standings.
+* Terms of use: https://disneytermsofuse.com/
+* Privacy policy: https://privacy.thewaltdisneycompany.com/en/
+
 == Changelog ==
+
+= 1.7 =
+* Fixed empty widget ("No se pudieron cargar los datos") after ESPN blocked `site.api.espn.com` (HTTP 403).
+* Fetch standings from `site.web.api.espn.com` with the previous endpoint as fallback.
+* Require HTTP 200 JSON before parsing; keep using ESPN rank for table order.
 
 = 1.5 =
 * Renamed plugin to TSO-Tabla-Liga
@@ -108,6 +122,9 @@ Sí. El plugin utiliza transients de WordPress, totalmente compatibles con LiteS
 * First public release
 
 == Upgrade Notice ==
+
+= 1.7 =
+Fixes the empty La Liga table when ESPN returns HTTP 403 on site.api.espn.com.
 
 = 1.5 =
 Security and compatibility improvements. Update recommended.

@@ -3,14 +3,18 @@
  * Plugin Name: TSO-Tabla-Liga
  * Description: Widget Tabla de Clasificación de la Liga LFP (ESPN API, caché 1h)
  * Plugin URI:  https://tusoporteonline.es
- * Version:     1.6
+ * Version:     1.7
  * Author:      Tu Soporte Online
  * License:     GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Tested up to: 6.9
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+define( 'TSOTL_VERSION', '1.7' );
 
 /* CSS */
 add_action( 'wp_head', function() {
@@ -77,36 +81,95 @@ function tso_espn_logo_url( $href, $size = 40 ) {
     return $href;
 }
 
+/**
+ * Fetch standings JSON from ESPN (site.api is often blocked by Akamai 403).
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function tso_fetch_espn_standings_entries() {
+    $urls = array(
+        'https://site.web.api.espn.com/apis/v2/sports/soccer/esp.1/standings',
+        'https://site.api.espn.com/apis/v2/sports/soccer/esp.1/standings',
+    );
+
+    $args = array(
+        'timeout' => 12,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+        'user-agent' => 'TSO-Tabla-Liga/' . TSOTL_VERSION . '; ' . home_url( '/' ),
+    );
+
+    foreach ( $urls as $url ) {
+        $response = wp_remote_get( $url, $args );
+        if ( is_wp_error( $response ) ) {
+            continue;
+        }
+        if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+            continue;
+        }
+
+        $data = json_decode( wp_remote_retrieve_body( $response ), true );
+        if ( ! is_array( $data ) ) {
+            continue;
+        }
+
+        if ( ! empty( $data['children'] ) && is_array( $data['children'] ) ) {
+            foreach ( $data['children'] as $child ) {
+                if ( ! empty( $child['standings']['entries'] ) && is_array( $child['standings']['entries'] ) ) {
+                    return $child['standings']['entries'];
+                }
+            }
+        }
+
+        if ( ! empty( $data['standings']['entries'] ) && is_array( $data['standings']['entries'] ) ) {
+            return $data['standings']['entries'];
+        }
+    }
+
+    return array();
+}
+
 /* Obtenir dades amb caché */
 function tso_get_laliga_standings() {
     $cached = get_transient( 'tso_laliga_standings' );
-    if ( $cached !== false ) return $cached;
+    if ( $cached !== false ) {
+        return $cached;
+    }
 
-    $response = wp_remote_get( 'https://site.api.espn.com/apis/v2/sports/soccer/esp.1/standings', array(
-        'timeout' => 8,
-    ) );
+    $entries = tso_fetch_espn_standings_entries();
+    if ( empty( $entries ) ) {
+        return array();
+    }
 
-    if ( is_wp_error( $response ) ) return array();
-
-    $data = json_decode( wp_remote_retrieve_body( $response ), true );
-    if ( empty( $data['children'][0]['standings']['entries'] ) ) return array();
-
-    $teams = array();
-    $pos   = 1;
-    foreach ( $data['children'][0]['standings']['entries'] as $entry ) {
+    $teams    = array();
+    $fallback = 1;
+    foreach ( $entries as $entry ) {
         $stats = array();
-        foreach ( $entry['stats'] as $stat ) {
-            if ( ! isset( $stat['name'] ) ) continue;
-            $stats[ $stat['name'] ] = intval( $stat['value'] ?? 0 );
+        if ( ! empty( $entry['stats'] ) && is_array( $entry['stats'] ) ) {
+            foreach ( $entry['stats'] as $stat ) {
+                if ( ! isset( $stat['name'] ) ) {
+                    continue;
+                }
+                $stats[ $stat['name'] ] = intval( isset( $stat['value'] ) ? $stat['value'] : 0 );
+            }
         }
+
         $name = '';
-        if ( ! empty( $entry['team']['displayName'] ) )      $name = $entry['team']['displayName'];
-        elseif ( ! empty( $entry['team']['name'] ) )         $name = $entry['team']['name'];
-        elseif ( ! empty( $entry['team']['abbreviation'] ) ) $name = $entry['team']['abbreviation'];
-        else $name = '?';
+        if ( ! empty( $entry['team']['displayName'] ) ) {
+            $name = $entry['team']['displayName'];
+        } elseif ( ! empty( $entry['team']['name'] ) ) {
+            $name = $entry['team']['name'];
+        } elseif ( ! empty( $entry['team']['abbreviation'] ) ) {
+            $name = $entry['team']['abbreviation'];
+        } else {
+            $name = '?';
+        }
+
+        $pos = ! empty( $stats['rank'] ) ? intval( $stats['rank'] ) : $fallback;
 
         $teams[] = array(
-            'pos'  => $pos++,
+            'pos'  => $pos,
             'name' => $name,
             'logo' => tso_espn_logo_url( isset( $entry['team']['logos'][0]['href'] ) ? $entry['team']['logos'][0]['href'] : '' ),
             'pj'   => isset( $stats['gamesPlayed'] ) ? $stats['gamesPlayed'] : 0,
@@ -115,7 +178,15 @@ function tso_get_laliga_standings() {
             'p'    => isset( $stats['losses'] )      ? $stats['losses']      : 0,
             'pts'  => isset( $stats['points'] )      ? $stats['points']      : 0,
         );
+        $fallback++;
     }
+
+    usort(
+        $teams,
+        function ( $a, $b ) {
+            return intval( $a['pos'] ) - intval( $b['pos'] );
+        }
+    );
 
     set_transient( 'tso_laliga_standings', $teams, 1 * HOUR_IN_SECONDS );
     return $teams;
@@ -187,7 +258,7 @@ add_action( 'wp_enqueue_scripts', function() {
         'tso-tabla-ajax',
         '',   // script inline, sense fitxer extern
         array( 'jquery' ),
-        '1.6',
+        TSOTL_VERSION,
         true  // al footer
     );
     wp_enqueue_script( 'tso-tabla-ajax' );
