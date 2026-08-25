@@ -86,7 +86,7 @@ function tso_espn_logo_url( $href, $size = 40 ) {
  *
  * @return array<int,array<string,mixed>>
  */
-function tso_fetch_espn_standings_entries() {
+function tsotl_fetch_espn_standings_entries() {
     $urls = array(
         'https://site.web.api.espn.com/apis/v2/sports/soccer/esp.1/standings',
         'https://site.api.espn.com/apis/v2/sports/soccer/esp.1/standings',
@@ -137,7 +137,7 @@ function tso_get_laliga_standings() {
         return $cached;
     }
 
-    $entries = tso_fetch_espn_standings_entries();
+    $entries = tsotl_fetch_espn_standings_entries();
     if ( empty( $entries ) ) {
         return array();
     }
