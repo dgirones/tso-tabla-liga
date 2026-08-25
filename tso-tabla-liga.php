@@ -3,7 +3,7 @@
  * Plugin Name: TSO-Tabla-Liga
  * Description: Widget Tabla de Clasificación de la Liga LFP (ESPN API, caché 1h)
  * Plugin URI:  https://tusoporteonline.es
- * Version:     1.6
+ * Version:     1.7
  * Author:      Tu Soporte Online
  * License:     GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -83,10 +83,21 @@ function tso_get_laliga_standings() {
     if ( $cached !== false ) return $cached;
 
     $response = wp_remote_get( 'https://site.api.espn.com/apis/v2/sports/soccer/esp.1/standings', array(
-        'timeout' => 8,
+        'timeout'    => 8,
+        'user-agent' => sprintf(
+            'Apache-HttpClient/4.5.14 (TSO-Tabla-Liga/%s; WordPress/%s)',
+            '1.7',
+            get_bloginfo( 'version' )
+        ),
     ) );
 
-    if ( is_wp_error( $response ) ) return array();
+    if ( is_wp_error( $response ) ) {
+        return array();
+    }
+
+    if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+        return array();
+    }
 
     $data = json_decode( wp_remote_retrieve_body( $response ), true );
     if ( empty( $data['children'][0]['standings']['entries'] ) ) return array();
@@ -187,7 +198,7 @@ add_action( 'wp_enqueue_scripts', function() {
         'tso-tabla-ajax',
         '',   // script inline, sense fitxer extern
         array( 'jquery' ),
-        '1.6',
+        '1.7',
         true  // al footer
     );
     wp_enqueue_script( 'tso-tabla-ajax' );
