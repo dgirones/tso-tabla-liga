@@ -4,7 +4,7 @@ Tags: football, laliga, standings, widget, soccer
 Requires at least: 6.1
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7
+Stable tag: 1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,9 @@ This plugin relies on one third-party service to display standings.
 
 == Changelog ==
 
+= 1.8 =
+* Fixed widget title still showing in block themes when "Mostrar títol" is unchecked.
+
 = 1.7 =
 * Fixed ESPN API requests blocked by the WordPress default User-Agent (HTTP 403).
 * Added HTTP response code validation before parsing standings JSON.
@@ -132,6 +135,9 @@ This plugin relies on one third-party service to display standings.
 * Initial public release.
 
 == Upgrade Notice ==
+
+= 1.8 =
+Fixes the widget title still appearing when "Mostrar títol" is disabled in block themes.
 
 = 1.7 =
 Fixes standings failing to load when ESPN blocks the WordPress User-Agent. Clear the widget cache after updating.

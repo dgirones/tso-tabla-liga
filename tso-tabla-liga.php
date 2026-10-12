@@ -3,7 +3,7 @@
  * Plugin Name: TSO-Tabla-Liga
  * Description: Widget Tabla de Clasificación de la Liga LFP (ESPN API, caché 1h)
  * Plugin URI:  https://tusoporteonline.es
- * Version:     1.7
+ * Version:     1.8
  * Author:      Tu Soporte Online
  * License:     GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -86,7 +86,7 @@ function tso_get_laliga_standings() {
         'timeout'    => 8,
         'user-agent' => sprintf(
             'Apache-HttpClient/4.5.14 (TSO-Tabla-Liga/%s; WordPress/%s)',
-            '1.7',
+            '1.8',
             get_bloginfo( 'version' )
         ),
     ) );
@@ -198,7 +198,7 @@ add_action( 'wp_enqueue_scripts', function() {
         'tso-tabla-ajax',
         '',   // script inline, sense fitxer extern
         array( 'jquery' ),
-        '1.7',
+        '1.8',
         true  // al footer
     );
     wp_enqueue_script( 'tso-tabla-ajax' );
@@ -233,12 +233,13 @@ class TSO_Clasificacion_Widget extends WP_Widget {
     }
 
     public function widget( $args, $instance ) {
-        $show_title = isset( $instance['show_title'] ) ? (bool) $instance['show_title'] : false;
+        $show_title = ! empty( $instance['show_title'] );
         $title      = empty( $instance['title'] ) ? 'TSO-Tabla-Liga' : $instance['title'];
+        $title      = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
         echo wp_kses_post( $args['before_widget'] );
 
-        if ( $show_title ) {
+        if ( $show_title && $title ) {
             echo wp_kses_post( $args['before_title'] ) . esc_html( $title ) . wp_kses_post( $args['after_title'] );
         }
 
@@ -250,7 +251,7 @@ class TSO_Clasificacion_Widget extends WP_Widget {
     }
 
     public function form( $instance ) {
-        $show_title = isset( $instance['show_title'] ) ? (bool) $instance['show_title'] : false;
+        $show_title = ! empty( $instance['show_title'] );
         $title      = empty( $instance['title'] ) ? 'TSO-Tabla-Liga' : $instance['title'];
         ?>
         <p>
@@ -287,6 +288,47 @@ class TSO_Clasificacion_Widget extends WP_Widget {
 add_action( 'widgets_init', function() {
     register_widget( 'TSO_Clasificacion_Widget' );
 } );
+
+/**
+ * Block themes and some themes print the widget title from $instance['title']
+ * even when our checkbox is off. Clear it before render.
+ *
+ * @param array     $instance Widget instance.
+ * @param WP_Widget $widget   Widget object.
+ * @param array     $args     Sidebar args.
+ * @return array
+ */
+function tso_tabla_liga_widget_display_callback( $instance, $widget, $args ) {
+    if ( ! ( $widget instanceof TSO_Clasificacion_Widget ) ) {
+        return $instance;
+    }
+
+    if ( empty( $instance['show_title'] ) ) {
+        $instance['title'] = '';
+    }
+
+    return $instance;
+}
+add_filter( 'widget_display_callback', 'tso_tabla_liga_widget_display_callback', 10, 3 );
+
+/**
+ * @param string $title    Widget title.
+ * @param array  $instance Widget instance.
+ * @param string $id_base  Widget id base.
+ * @return string
+ */
+function tso_tabla_liga_widget_title( $title, $instance, $id_base ) {
+    if ( 'tso_clasificacion_widget' !== $id_base ) {
+        return $title;
+    }
+
+    if ( empty( $instance['show_title'] ) ) {
+        return '';
+    }
+
+    return $title;
+}
+add_filter( 'widget_title', 'tso_tabla_liga_widget_title', 10, 3 );
 
 add_action( 'wp_ajax_tso_clear_standings_cache', function() {
     check_admin_referer( 'tso_clear_cache' );
