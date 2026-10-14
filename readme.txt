@@ -4,7 +4,7 @@ Tags: football, laliga, standings, widget, soccer
 Requires at least: 6.1
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,8 +20,8 @@ Standings are fetched from the public ESPN Sports API, cached for one hour with 
 
 * Current La Liga standings (position, team, played, points, wins, draws, losses)
 * Team logos optimised through the ESPN CDN combiner
-* Dark table styling suited to sidebar widgets
-* Colour-coded zones: Champions League, Europa League, and relegation
+* Dark table by default, with a light version that follows the day/night mode of the TSO Blog theme
+* Colour-coded zones: Champions League (1–4), Europa League (5th), Conference League (6th), and relegation
 * Optional widget title
 * Manual cache clear link in the widget settings screen
 * No API key or registration required
@@ -70,7 +70,7 @@ Standings are stored in a WordPress transient for one hour. After that, the next
 
 = How do I clear the cache manually? =
 
-Open **Appearance → Widgets**, expand the **TSO-Tabla-Liga** widget, and click **Netejar caché** (Clear cache).
+Open **Appearance → Widgets**, expand the **TSO-Tabla-Liga** widget, and click **Clear cache**.
 
 = Is it compatible with caching plugins? =
 
@@ -107,8 +107,11 @@ This plugin relies on one third-party service to display standings.
 
 == Changelog ==
 
+= 1.8.1 =
+* Widget and table strings now follow the site language (English source, Spanish and Catalan included).
+
 = 1.8 =
-* Fixed widget title still showing in block themes when "Mostrar títol" is unchecked.
+* Added a light (day mode) table style, shown as a white card like the other widgets, for the TSO Blog theme; the table now uses CSS variables instead of inline colours.
 
 = 1.7 =
 * Fixed ESPN API requests blocked by the WordPress default User-Agent (HTTP 403).
@@ -135,9 +138,6 @@ This plugin relies on one third-party service to display standings.
 * Initial public release.
 
 == Upgrade Notice ==
-
-= 1.8 =
-Fixes the widget title still appearing when "Mostrar títol" is disabled in block themes.
 
 = 1.7 =
 Fixes standings failing to load when ESPN blocks the WordPress User-Agent. Clear the widget cache after updating.

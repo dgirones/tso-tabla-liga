@@ -1,0 +1,71 @@
+# Translation of TSO-Tabla-Liga in Catalan.
+# Copyright (C) 2026 Tu Soporte Online
+msgid ""
+msgstr ""
+"Project-Id-Version: TSO-Tabla-Liga 1.8.1\n"
+"Report-Msgid-Bugs-To: https://tusoporteonline.es\n"
+"POT-Creation-Date: 2026-10-12 12:00+0200\n"
+"PO-Revision-Date: 2026-10-12 12:00+0200\n"
+"Language-Team: Catalan\n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: tso-tabla-liga\n"
+
+msgid "La Liga standings widget. Data from the ESPN API, cached for one hour."
+msgstr "Widget de classificació de La Liga. Dades de l'API d'ESPN, amb memòria cau d'una hora."
+
+msgid "Live La Liga standings."
+msgstr "Classificació de La Liga en temps real."
+
+msgid "Show title"
+msgstr "Mostrar el títol"
+
+msgid "Title:"
+msgstr "Títol:"
+
+msgid "Clear cache"
+msgstr "Netejar la memòria cau"
+
+msgid "Loading standings…"
+msgstr "S'està carregant la classificació…"
+
+msgid "Could not load the standings."
+msgstr "No s'ha pogut carregar la classificació."
+
+msgid "Team"
+msgstr "Equip"
+
+#. Short table header for matches played.
+msgid "MP"
+msgstr "PJ"
+
+#. Short table header for points.
+msgid "Pts"
+msgstr "Pts"
+
+#. Short table header for wins.
+msgid "W"
+msgstr "G"
+
+#. Short table header for draws.
+msgid "D"
+msgstr "E"
+
+#. Short table header for losses.
+msgid "L"
+msgstr "P"
+
+msgid "Champions"
+msgstr "Champions"
+
+msgid "Europa"
+msgstr "Europa"
+
+msgid "Conference"
+msgstr "Conference"
+
+msgid "Relegation"
+msgstr "Descens"
